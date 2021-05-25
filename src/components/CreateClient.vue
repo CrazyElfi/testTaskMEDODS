@@ -3,28 +3,38 @@
     <form class="form-wrapper" @submit.prevent="onsubmit">
       <fieldset>
         <legend> Форма создания Клиента</legend>
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.surname.$error }">
           <label for="surname">Фамилия*</label>
+          <p class="errorText" v-if="!$v.surname.required ">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="surname"
               v-model="surname"
+              :class="{ error: $v.surname.$error }"
+              @change="$v.surname.$touch()"
               type="text"
               name="surname"
           >
         </div>
 
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.name.$error }">
           <label for="name">Имя*</label>
+          <p class="errorText" v-if="!$v.name.required">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="name"
               v-model="name"
+              :class="{ error: $v.name.$error }"
+              @change="$v.name.$touch()"
               type="text"
               name="name"
           >
         </div>
 
         <div class="form-item">
-          <label for="middleName">Отчество*</label>
+          <label for="middleName">Отчество</label>
           <input
               id="middleName"
               v-model="middleName"
@@ -33,21 +43,31 @@
           >
         </div>
 
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.birthday.$error }">
           <label for="birthday">Дата рождения*</label>
+          <p class="errorText" v-if="!$v.birthday.required">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="birthday"
               v-model="birthday"
+              :class="{ error: $v.birthday.$error }"
+              @change="$v.birthday.$touch()"
               type="date"
               name="birthday"
           >
         </div>
 
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.phoneNumber.$error }">
           <label for="phoneNumber">Номер телефона*</label>
+          <p class="errorText" v-if="!$v.phoneNumber.required">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="phoneNumber"
               v-model="phoneNumber"
+              :class="{ error: $v.phoneNumber.$error }"
+              @change="$v.phoneNumber.$touch()"
               type="tel"
               name="phoneNumber"
               placeholder="11 цифр. Начинается с 7"
@@ -66,9 +86,14 @@
           <span>Выбрано: {{ gender }}</span>
         </div>
 
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.selectedTypeClient.$error }">
           <label for="typesClients">Группа клиентов*</label>
+          <p class="errorText" v-if="!$v.selectedTypeClient.required">
+            Поле обязательное для заполнения
+          </p>
           <select v-model="selectedTypeClient"
+                  :class="{ error: $v.selectedTypeClient.$error }"
+                  @change="$v.selectedTypeClient.$touch()"
                   id="typesClients"
                   name="typesClients" multiple>
 
@@ -137,11 +162,16 @@
           >
         </div>
 
-        <div class="form-item address">
+        <div class="form-item address" :class="{ errorInput: $v.address.city.$error }">
           <label for="city">Город*</label>
+          <p class="errorText" v-if="!$v.address.city.required ">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="city"
               v-model="address.city"
+              :class="{ error: $v.address.city.$error }"
+              @change="$v.address.city.$touch()"
               type="text"
               name="city"
           >
@@ -169,9 +199,14 @@
 
         <h3>Паспорт:</h3>
 
-        <div class="form-item docs">
+        <div class="form-item docs" :class="{ errorInput: $v.documentClient.typeDoc.$error }">
           <label for="typeDoc">Тип документа*</label>
+          <p class="errorText" v-if="!$v.documentClient.typeDoc.required ">
+            Поле обязательное для заполнения
+          </p>
           <select v-model="documentClient.typeDoc"
+                  :class="{ error: $v.documentClient.typeDoc.$error }"
+                  @change="$v.documentClient.typeDoc.$touch()"
                   id="typeDoc"
                   name="typeDoc">
             <option disabled value="">Выберите один из вариантов</option>
@@ -210,11 +245,16 @@
                     placeholder="Кем выдан"></textarea>
         </div>
 
-        <div class="form-item">
+        <div class="form-item" :class="{ errorInput: $v.documentClient.dateOfIssue.$error }">
           <label for="dateOfIssue">Дата выдачи*</label>
+          <p class="errorText" v-if="!$v.documentClient.dateOfIssue.required ">
+            Поле обязательное для заполнения
+          </p>
           <input
               id="dateOfIssue"
               v-model="documentClient.dateOfIssue"
+              :class="{ error: $v.documentClient.dateOfIssue.$error }"
+              @change="$v.documentClient.dateOfIssue.$touch()"
               type="date"
               name="dateOfIssue"
           >
@@ -238,6 +278,10 @@
 </template>
 
 <script>
+import { required } from 'vuelidate/lib/validators'
+
+
+const isPhone = (value) => /^((7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{11}$/.test(value)
 export default {
   name: 'CreateClient',
   data: () => {
@@ -250,11 +294,11 @@ export default {
       gender: null,
       selectedTypeClient: [],
       typesClients: [
-        { id: 1, text: 'VIP'},
-        { id: 2, text: 'Проблемные'},
-        { id: 3, text: 'ОМС'},
+        {id: 1, text: 'VIP'},
+        {id: 2, text: 'Проблемные'},
+        {id: 3, text: 'ОМС'},
       ],
-      doctors: '',
+      doctors: null,
       checkboxSms: null,
       address: {
         postcode: '',
@@ -272,10 +316,118 @@ export default {
         dateOfIssue: ''
       }
     }
+  },
+  validations: {
+    surname: {
+      required,
+    },
+    name: {
+      required,
+    },
+    birthday: {
+      required,
+    },
+    phoneNumber: {
+      required,
+      phoneValid: isPhone
+    },
+    selectedTypeClient: {
+      required,
+    },
+    address: {
+      city: {
+        required,
+      },
+    },
+    documentClient: {
+      typeDoc: {
+        required,
+      },
+      dateOfIssue: {
+        required,
+      }
+    }
+  },
+  methods: {
+    onsubmit() {
+      this.$v.$touch()
+      if (!this.$v.$invalid) {
+        const user = {
+          surname: this.surname,
+          name: this.name,
+          middleName: this.middleName,
+          birthday: this.birthday,
+          phoneNumber: this.phoneNumber,
+          gender: this.gender,
+          selectedTypeClient: this.selectedTypeClient,
+          doctor: this.doctor,
+          checkboxSms: this.checkboxSms,
+          address: {
+            postcode: this.address.postcode,
+            country: this.address.country,
+            region: this.address.region,
+            city: this.address.city,
+            street: this.address.street,
+            house: this.address.house
+          },
+          documentClient: {
+            typeDoc: this.documentClient.typeDoc,
+            seriesDoc: this.documentClient.seriesDoc,
+            numberDoc: this.documentClient.numberDoc,
+            authority: this.documentClient.authority,
+            dateOfIssue: this.documentClient.dateOfIssue
+          }
+        }
+        console.log(user)
+
+        alert("Клиент создан")
+
+        this.surname = null,
+        this.name = null,
+        this.middleName = null,
+        this.birthday = null,
+        this.phoneNumber = null,
+        this.gender = null,
+        this.selectedTypeClient = [],
+
+
+        this.checkboxSms = null,
+        this.address = {
+          postcode: '',
+          country: '',
+          region: '',
+          city: '',
+          street: '',
+          house: ''
+        }
+
+        this.documentClient = {
+          typeDoc: '',
+          seriesDoc: '',
+          numberDoc: '',
+          authority: '',
+          dateOfIssue: ''
+        }
+      }
+    }
+
   }
 }
 </script>
 
 <style lang="sass">
 @import '../assets/sass/main.sass'
+
+.form-item .errorText
+  display: none
+  margin-bottom: 8px
+  font-size: 13.4px
+  color: #de4040
+
+.form-item
+  &.errorInput .errorText
+    display: block
+
+input.error
+  border-color: #de4040
 </style>
